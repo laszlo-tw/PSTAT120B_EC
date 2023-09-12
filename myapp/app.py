@@ -15,8 +15,9 @@ app_ui = ui.page_fixed(
 
             # parameter controls: Shiny documentation says "A more powerful (but slower) way to conditionally show UI content is to use ui."
             # but idk how to do that
+            # note: in future implementations it may be better to switch the slider inputs in this section to text inputs (with restrictions on possible values)
             ui.h5(ui.strong("Population Parameters")),
-            ui.panel_conditional("input.dist === 'exponential'", ui.input_slider("exponential_rate", "Rate", 0,
+            ui.panel_conditional("input.dist === 'exponential'", ui.input_slider("exponential_rate", "Rate", 0.05,
                                                                                  200, value=1, step=0.05),
 
                                  ),
@@ -29,7 +30,7 @@ app_ui = ui.page_fixed(
                                  ui.input_slider("binomial_p", "p (Probability of Success)", 0,
                                                  1, value=0.5, step=0.05),
                                  ),
-            ui.panel_conditional("input.dist === 'poisson'", ui.input_slider("poisson_rate", "Rate", 0,
+            ui.panel_conditional("input.dist === 'poisson'", ui.input_slider("poisson_rate", "Rate", 0.05,
                                                                              200, value=1, step=0.05),
 
                                  ),
@@ -38,9 +39,9 @@ app_ui = ui.page_fixed(
                                  ui.input_slider("normal_scale", "Scale (Standard Deviation )", 0,
                                                  200, value=1, step=0.05),
                                  ),
-            ui.panel_conditional("input.dist === 'gamma'", ui.input_slider("gamma_shape", "Shape", 0,
+            ui.panel_conditional("input.dist === 'gamma'", ui.input_slider("gamma_shape", "Shape", 0.05,
                                                                            200, value=1, step=0.05),
-                                 ui.input_slider("gamma_rate", "Rate", -1,
+                                 ui.input_slider("gamma_rate", "Rate", 0.05,
                                                  200, value=1, step=0.05),
                                  ),
             ui.panel_conditional("input.dist === 'chisquare'", ui.input_slider("chisquare_df", "Degrees of Freedom", 1,
@@ -125,15 +126,17 @@ def server(input, output, session):
         plt.title('Sample Means Density Plot')
         plt.xlabel('Sample Mean Observations')
         plt.ylabel('Frequency')
+        ax.legend()
 
         # plot observed sample mean distribution
-        ax.hist(sample_means, bins=25, density=True, color='lightskyblue')
-        ax.axvline(x=np.mean(sample_means), color='steelblue',
-                   label="observed mean of sample means", linewidth=2)
-        # TO-DO: add a curve to represent the observed distribution and compare with the normal curve?
-        # y, binEdges = np.histogram(sample_means, bins=25)
-        # bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
-        # ax1.plot(bincenters, y, '-', c='black')
+        ax.hist(sample_means, bins=25, density=True,
+                color='lightskyblue', label='Observed sample means')
+        t0 = np.mean(sample_means)
+        observed = 'Observed mean of sample means: ' + \
+            str(round(t0, 5))
+        ax.axvline(t0, color='steelblue', linewidth=2,
+                   label=observed)
+        # potential future feature: add a curve to represent the observed distribution and compare with the normal curve?
 
         # plot expected distribution
         # xmin, xmax = plt.xlim()
@@ -142,10 +145,14 @@ def server(input, output, session):
         x = np.linspace(xmin, xmax, 100)
         p = norm.pdf(x, expected_value, standard_deviation)
 
-        ax.plot(x, p, 'k', color='darkslateblue', linewidth=2)
-        x_bar = 'E[' + r'$\bar{X}$' + ']'
+        ax.plot(x, p, 'k', color='darkslateblue', linewidth=2,
+                label="Expected normal distribution")
+        expected = 'Expected mean of sample means: ' + \
+            str(round(expected_value, 5))
         ax.axvline(x=expected_value, color='darkslateblue',
-                   label=x_bar, linewidth=2)
+                   linewidth=2, label=expected)
+
+        plt.legend()
 
         return fig
         # return ax

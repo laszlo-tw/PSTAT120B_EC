@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# I considered abstractifying this for different distributions
-# but
+# Potential future feature: abstractify for different distributions with user-defined parameters
+# (It is pretty simple but since it is finals week I don't have enough time)
 
 # TO-DO: function descriptions
 
@@ -21,11 +21,9 @@ def generate_samples(s, n, p):
             plt.title('Sample' + str(i))
             plt.xlabel('Observation')
             plt.ylabel('Counts')
-            # plt.grid(axis='y', alpha=0.75)
 
             ax.hist(samples[i], bins=25)
 
-            # save histograms as image files if there is a reasonable amount of them
             fig.savefig('output' + str(i) + '.png')
 
             plt.clf()
@@ -39,7 +37,7 @@ def generate_sample_mean_distribution(s, n, p=0):
     fig = plt.figure()
     ax = fig.add_subplot()
 
-    plt.title('Sample Mean Density Plot')
+    plt.title('Sample Mean Plot')
     plt.xlabel('Observed Sample Mean')
     plt.ylabel('Counts')
 
@@ -52,6 +50,8 @@ def run():
     s = int(input("Enter number of samples: "))
     p = int(input("Enter number of sample histograms to be generated: "))
     generate_sample_mean_distribution(s, n, p)
+    print("Data and histograms generated for " + str(s) + " samples of " + str(n) +
+          " observations from an exponential distribution with rate 170")
 
 
 run()
